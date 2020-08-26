@@ -1,0 +1,104 @@
+#!/bin/sh
+
+# Install Dependencies
+
+
+function generate_ios {
+  base_file=${1%%.*}
+  /usr/bin/sips -Z 40 $1 --out "$2/${base_file}-iphone-notification@2x.png"
+  /usr/bin/sips -Z 60 $1 --out "$2/${base_file}-iphone-notification@3x.png"
+  /usr/bin/sips -Z 58 $1 --out "$2/${base_file}-iphone-settings@2x.png"
+  /usr/bin/sips -Z 87 $1 --out "$2/${base_file}-iphone-settings@3x.png"
+  /usr/bin/sips -Z 80 $1 --out "$2/${base_file}-iphone-spotlight@2x.png"
+  /usr/bin/sips -Z 120 $1 --out "$2/${base_file}-iphone-spotlight@3x.png"
+  /usr/bin/sips -Z 120 $1 --out "$2/${base_file}-iphone-app@2x.png"
+  /usr/bin/sips -Z 180 $1 --out "$2/${base_file}-iphone-app@3x.png"
+  /usr/bin/sips -Z 1024 $1 --out "$2/${base_file}-ios-app-store@1x.png"
+}
+
+function generate_ipad {
+  base_file=${1%%.*}
+  /usr/bin/sips -Z 20 $1 --out "$2/${base_file}-ipad-notification@1x.png"
+  /usr/bin/sips -Z 40 $1 --out "$2/${base_file}-ipad-notification@2x.png"
+  /usr/bin/sips -Z 29 $1 --out "$2/${base_file}-ipad-settings@1x.png"
+  /usr/bin/sips -Z 58 $1 --out "$2/${base_file}-ipad-settings@2x.png"
+  /usr/bin/sips -Z 40 $1 --out "$2/${base_file}-ipad-spotlight@1x.png"
+  /usr/bin/sips -Z 80 $1 --out "$2/${base_file}-ipad-spotlight@2x.png"
+  /usr/bin/sips -Z 76 $1 --out "$2/${base_file}-ipad-app@1x.png"
+  /usr/bin/sips -Z 152 $1 --out "$2/${base_file}-ipad-app@2x.png"
+  /usr/bin/sips -Z 167 $1 --out "$2/${base_file}-ipad-pro-app@2x.png"
+  /usr/bin/sips -Z 1024 $1 --out "$2/${base_file}-ipad-app-store@1x.png"
+}
+
+function generate_macos {
+  base_file=${1%%.*}
+  /usr/bin/sips -Z 16 $1 --out "$2/${base_file}-mac-one-six@1x.png"
+  /usr/bin/sips -Z 32 $1 --out "$2/${base_file}-mac-one-six@2x.png"
+  /usr/bin/sips -Z 32 $1 --out "$2/${base_file}-mac-three-two@1x.png"
+  /usr/bin/sips -Z 64 $1 --out "$2/${base_file}-mac-three-two@2x.png"
+  /usr/bin/sips -Z 128 $1 --out "$2/${base_file}-mac-one-two-eight@1x.png"
+  /usr/bin/sips -Z 256 $1 --out "$2/${base_file}-mac-one-two-eight@2x.png"
+  /usr/bin/sips -Z 256 $1 --out "$2/${base_file}-mac-two-five-six@1x.png"
+  /usr/bin/sips -Z 512 $1 --out "$2/${base_file}-mac-two-five-six@2x.png"
+  /usr/bin/sips -Z 512 $1 --out "$2/${base_file}-mac-five-one-two@1x.png"
+  /usr/bin/sips -Z 1024 $1 --out "$2/${base_file}-mac-five-one-two@2x.png"
+}
+
+function generate_watchos {
+  base_file=${1%%.*}
+  /usr/bin/sips -Z 48 $1 --out "$2/${base_file}-apple-watch-notification-three-eight@2x.png"
+  /usr/bin/sips -Z 55 $1 --out "$2/${base_file}-apple-watch-notification-four-x@2x.png"
+  /usr/bin/sips -Z 58 $1 --out "$2/${base_file}-apple-watch-companion-four-four@2x.png"
+  /usr/bin/sips -Z 87 $1 --out "$2/${base_file}-apple-watch-companion@3x.png"
+  /usr/bin/sips -Z 80 $1 --out "$2/${base_file}-apple-watch-home-screen-three-eight@2x.png"
+  /usr/bin/sips -Z 88 $1 --out "$2/${base_file}-apple-watch-home-screen-four-x@2x.png"
+  /usr/bin/sips -Z 100 $1 --out "$2/${base_file}-apple-watch-home-screen-four-four@2x.png"
+  /usr/bin/sips -Z 172 $1 --out "$2/${base_file}-apple-watch-short-look-three-eight@2x.png"
+  /usr/bin/sips -Z 196 $1 --out "$2/${base_file}-apple-watch-short-look-four-x@2x.png"
+  /usr/bin/sips -Z 216 $1 --out "$2/${base_file}-apple-watch-short-look-four-four@2x.png"
+  /usr/bin/sips -Z 1024 $1 --out "$2/${base_file}-apple-watch-app-store@1x.png"
+}
+
+# Parse command line arguments
+unset -v platforms
+icon_name="AppIcon"
+output_path="AppIcon"
+platforms="ios"
+while getopts ":f:i:o:p:" opt; do
+	case $opt in
+    f) file_name=$OPTARG;;
+    i) icon_name=$OPTARG;;
+    o) output_path=$OPTARG;;
+    p) platforms=("$OPTARG")
+        until [[ $(eval "echo \${$OPTIND}") =~ ^-.* ]] || [ -z $(eval "echo \${$OPTIND}") ]; do
+          platforms+=($(eval "echo \${$OPTIND}"))
+          OPTIND=$((OPTIND + 1))
+        done
+        ;;
+  esac
+done
+
+if [ ! -f "$file_name" ]; then
+    echo "$file_name does not exist."
+    exit 2
+fi
+
+mkdir -p $output_path
+
+for platform in "${platforms[@]}"; do
+  case "$platform" in
+    ios)
+      generate_ios $file_name $output_path 
+      ;;
+    ipados)
+      generate_ipad $file_name $output_path
+      ;;
+    macos)
+      generate_macos $file_name $output_path
+      ;;
+    watchos)
+      generate_watchos $file_name $output_path
+      ;;
+  esac
+done
+
